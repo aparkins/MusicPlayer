@@ -1,0 +1,47 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.altik.musicplayer.app.MediaScrubberFragment">
+
+    <!-- TODO: replace seekbar with custom scrubber -->
+    <SeekBar
+        android:id = "@+id/scrubber"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
+
+    <LinearLayout
+        android:layout_weight="1"
+        android:id = "@+id/scrubberButtons"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:weightSum="3">
+
+        <!-- TODO: better buttons -->
+        <Button
+            android:id="@+id/backButton"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text = "back" />
+        <ToggleButton
+            android:id="@+id/playButton"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:textOff="Play"
+            android:textOn="Pause" />
+        <Button
+            android:id="@+id/forwardButton"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text = "forward" />
+
+    </LinearLayout>
+
+</LinearLayout>
