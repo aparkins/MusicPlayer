@@ -1,19 +1,49 @@
 package com.altik.musicplayer.app.Adapters;
 
-import android.database.DataSetObserver;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import java.util.LinkedList;
 
 /**
  * Created by Altik_0 on 5/14/2014.
  */
-public class LibraryListAdapter implements ListAdapter
+public class LibraryListAdapter extends BaseAdapter
 {
-    public LibraryListAdapter()
+    LinkedList<String> songTitles;
+    Context c;
+
+    public LibraryListAdapter(Context _c)
     {
-        // First, track down all the music files! :D
-        // TODO: having a bit of difficulty figuring this bit out atm
+        c = _c;
+        songTitles = new LinkedList<String>();
+
+        // Track down all the music titles:
+        ContentResolver resolver = c.getContentResolver();
+        String[] projection = new String[] {MediaStore.Audio.AudioColumns.TITLE,
+                                            MediaStore.MediaColumns.DATA};
+
+        Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
+
+        if (cursor.moveToFirst())
+        {
+            do
+            {
+                songTitles.add(cursor.getString(0));
+                //Log.i("Title - IS_MUSIC", cursor.getString(0) + " - " + cursor.getString(1));
+            } while(cursor.moveToNext());
+        }
     }
 
     @Override
@@ -29,36 +59,22 @@ public class LibraryListAdapter implements ListAdapter
     }
 
     @Override
-    public void registerDataSetObserver(DataSetObserver dataSetObserver)
-    {
-        // TODO
-    }
-
-    @Override
-    public void unregisterDataSetObserver(DataSetObserver dataSetObserver)
-    {
-        // TODO
-    }
-
-    @Override
     public int getCount()
     {
-        // TODO
-        return 0;
+        return songTitles.size();
     }
 
     @Override
     public Object getItem(int i)
     {
-        // TODO
-        return null;
+        return songTitles.get(i);
     }
 
     @Override
     public long getItemId(int i)
     {
         // TODO
-        return 0;
+        return i;
     }
 
     @Override
@@ -72,7 +88,10 @@ public class LibraryListAdapter implements ListAdapter
     public View getView(int i, View view, ViewGroup viewGroup)
     {
         // TODO
-        return null;
+        if (view == null || !(view instanceof TextView))
+            view = new TextView(c);
+        ((TextView)view).setText(songTitles.get(i));
+        return view;
     }
 
     @Override
@@ -92,7 +111,6 @@ public class LibraryListAdapter implements ListAdapter
     @Override
     public boolean isEmpty()
     {
-        // TODO
-        return false;
+        return songTitles.isEmpty();
     }
 }

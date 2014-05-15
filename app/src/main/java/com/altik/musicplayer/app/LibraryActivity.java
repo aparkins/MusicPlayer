@@ -22,7 +22,7 @@ public class LibraryActivity extends Activity implements MediaScrubberFragment.S
         try
         {
             playerA.reset();
-            String stg = Environment.getRootDirectory().getPath() + "/Music/Other Music/Queen-Under_Pressure.mp3";
+            String stg = "/storage/emulated/0/Music/Other Music/Macklemore_and_Ryan_Lewis_-_Thrift_Shop_(feat._Wanz)_mp3.shmidt.net.mp3";
             Log.d("String!", stg);
             playerA.setDataSource(stg);
             playerA.prepare();

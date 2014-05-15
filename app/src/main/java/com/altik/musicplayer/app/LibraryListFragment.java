@@ -24,7 +24,7 @@ import com.altik.musicplayer.app.Adapters.LibraryListAdapter;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class LibraryListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>
+public class LibraryListFragment extends ListFragment
 {
 
     // TODO: Rename and change types of parameters
@@ -51,23 +51,13 @@ public class LibraryListFragment extends ListFragment implements LoaderManager.L
     {
         super.onCreate(savedInstanceState);
 
-        setListAdapter(new LibraryListAdapter());
+        setListAdapter(new LibraryListAdapter(getActivity()));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup vg, Bundle bundle)
     {
         View v = super.onCreateView(inflater, vg, bundle);
-
-        getLoaderManager().initLoader(0, null, this);
-        mAdapter = new SimpleCursorAdapter(
-                            getActivity(),                // Current context
-                            android.R.layout.simple_list_item_1,  // Layout for a single row
-                            null,                // No Cursor yet
-                            null,        // Cursor columns to use
-                            null,           // Layout fields to use
-                            0                    // No flags
-        );
 
         return v;
     }
@@ -78,29 +68,6 @@ public class LibraryListFragment extends ListFragment implements LoaderManager.L
         super.onListItemClick(l, v, position, id);
 
         // TODO
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle)
-    {
-        // TODO: check loaderID
-        return new CursorLoader(getActivity(),
-                                MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
-                                null, null, null, null);
-    }
-
-    SimpleCursorAdapter mAdapter;
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor)
-    {
-        mAdapter.changeCursor(cursor);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader)
-    {
-
     }
 
     /**
