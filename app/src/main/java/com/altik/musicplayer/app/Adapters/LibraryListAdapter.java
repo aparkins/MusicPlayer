@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.altik.musicplayer.app.Model.LibraryModel;
+import com.altik.musicplayer.app.Model.SongCache;
+
 import java.util.LinkedList;
 
 /**
@@ -17,33 +20,13 @@ import java.util.LinkedList;
  */
 public class LibraryListAdapter extends BaseAdapter
 {
-    LinkedList<String> songTitles;
+    LibraryModel lm;
     Context c;
 
     public LibraryListAdapter(Context _c)
     {
         c = _c;
-        songTitles = new LinkedList<String>();
-
-        // Track down all the music titles:
-        ContentResolver resolver = c.getContentResolver();
-        String[] projection = new String[] {MediaStore.Audio.AudioColumns.TITLE,
-                                            MediaStore.MediaColumns.DATA};
-
-        Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                null,
-                null,
-                null);
-
-        if (cursor.moveToFirst())
-        {
-            do
-            {
-                songTitles.add(cursor.getString(0));
-                //Log.i("Title - IS_MUSIC", cursor.getString(0) + " - " + cursor.getString(1));
-            } while(cursor.moveToNext());
-        }
+        lm = LibraryModel.getInstance(c);
     }
 
     @Override
@@ -61,27 +44,25 @@ public class LibraryListAdapter extends BaseAdapter
     @Override
     public int getCount()
     {
-        return songTitles.size();
+        return lm.GetLibraryCount();
     }
 
     @Override
     public Object getItem(int i)
     {
-        return songTitles.get(i);
+        return lm.GetSongCacheAtIndex(i);
     }
 
     @Override
     public long getItemId(int i)
     {
-        // TODO
-        return i;
+        return lm.GetSongCacheAtIndex(i).ID;
     }
 
     @Override
     public boolean hasStableIds()
     {
-        // TODO
-        return false;
+        return true;
     }
 
     @Override
@@ -90,7 +71,8 @@ public class LibraryListAdapter extends BaseAdapter
         // TODO
         if (view == null || !(view instanceof TextView))
             view = new TextView(c);
-        ((TextView)view).setText(songTitles.get(i));
+        ((TextView)view).setText(((SongCache.SongCacheLine)getItem(i)).Title);
+        ((TextView)view).setTextSize(24.0f);
         return view;
     }
 
@@ -111,6 +93,6 @@ public class LibraryListAdapter extends BaseAdapter
     @Override
     public boolean isEmpty()
     {
-        return songTitles.isEmpty();
+        return lm.CacheIsEmpty();
     }
 }

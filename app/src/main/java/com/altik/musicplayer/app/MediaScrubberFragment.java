@@ -18,7 +18,7 @@ import java.io.InvalidClassException;
  */
 public class MediaScrubberFragment extends Fragment
 {
-    public interface ScrubberCallback
+    public static interface ScrubberCallback
     {
         public void Play();
         public void Pause();

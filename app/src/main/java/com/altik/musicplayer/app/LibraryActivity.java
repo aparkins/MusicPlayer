@@ -1,10 +1,13 @@
 package com.altik.musicplayer.app;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,7 +15,9 @@ import android.view.MenuItem;
 import java.io.IOException;
 
 
-public class LibraryActivity extends Activity implements MediaScrubberFragment.ScrubberCallback
+public class LibraryActivity extends Activity
+        implements MediaScrubberFragment.ScrubberCallback,
+                   LibraryListFragment.LibraryFragmentCallback
 {
 
     @Override
@@ -62,6 +67,12 @@ public class LibraryActivity extends Activity implements MediaScrubberFragment.S
     public void SkipBack()
     {
         // TODO
+    }
+
+    @Override
+    public void SongIdSelected(long ID)
+    {
+
     }
 
 
