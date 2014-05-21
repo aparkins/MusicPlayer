@@ -5,7 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 
-import java.net.URI;
+import android.net.Uri;
+import android.util.Log;
+
+import java.io.IOException;
 
 /**
  * Created by Altik_0 on 5/19/2014.
@@ -57,6 +60,7 @@ public class LibraryModel
                 {
                     int id = cursor.getInt(0);
                     String title = cursor.getString(1);
+                    Log.i("ID - title", Integer.toString(id) + " - " + title);
                     cache.AddCacheLine(id, title);
                 }
             } while(cursor.moveToNext());
@@ -85,17 +89,23 @@ public class LibraryModel
         return cache.IsEmpty();
     }
 
-    public URI GetUriFromSongId(int ID)
+    public String GetPathFromSongId(int ID)
     {
+        Log.i("ID to get path for", Integer.toString(ID));
         ContentResolver cr = c.getContentResolver();
         String[] projection = new String[] {MediaStore.MediaColumns.DATA};
+        String filter = MediaStore.MediaColumns._ID + " = ?";
 
         Cursor cursor = cr.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 projection,
-                null,
-                null,
+                filter,
+                new String[] {Integer.toString(ID)},
                 null);
 
-        // TODO
+        if(cursor.moveToFirst())
+            return cursor.getString(0);
+
+        // If we didn't find one, return null
+        return null;
     }
 }

@@ -19,9 +19,9 @@ import com.altik.musicplayer.app.Adapters.LibraryListAdapter;
  */
 public class LibraryListFragment extends ListFragment
 {
-    private static interface LibraryFragmentCallback
+    public static interface LibraryFragmentCallback
     {
-        public void SongIdSelected(long ID);
+        public void SongIdSelected(int ID);
         // TODO: others
     }
 
@@ -75,6 +75,7 @@ public class LibraryListFragment extends ListFragment
     {
         super.onListItemClick(l, v, position, id);
 
-        // TODO
+        if (songSelectionListener != null)
+            songSelectionListener.SongIdSelected((int)id);
     }
 }

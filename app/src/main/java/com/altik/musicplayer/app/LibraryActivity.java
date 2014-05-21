@@ -1,16 +1,11 @@
 package com.altik.musicplayer.app;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.database.Cursor;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+
+import com.altik.musicplayer.app.Model.LibraryModel;
 
 import java.io.IOException;
 
@@ -20,10 +15,13 @@ public class LibraryActivity extends Activity
                    LibraryListFragment.LibraryFragmentCallback
 {
 
+    boolean isPlayerAActive;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         playerA = new MediaPlayer();
+        playerB = new MediaPlayer();
         try
         {
             playerA.reset();
@@ -31,12 +29,12 @@ public class LibraryActivity extends Activity
             Log.d("String!", stg);
             playerA.setDataSource(stg);
             playerA.prepare();
+            isPlayerAActive = true;
         }
         catch (IOException e)
         {
             Log.e("ERROR", e.getMessage());
         }
-        //playerB = MediaPlayer.create(this, Uri.parse("/storage/emulated/0/Music/Tim & Eric/Tim and Eric - 44 Salame Rock.mp3"));
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_library);
@@ -70,9 +68,46 @@ public class LibraryActivity extends Activity
     }
 
     @Override
-    public void SongIdSelected(long ID)
+    public void SongIdSelected(int ID)
     {
+        if (isPlayerAActive)
+        {
+            try
+            {
+                playerB.reset();
+                String stg = LibraryModel.getInstance(this).GetPathFromSongId(ID);
+                Log.d("New path!", stg);
+                playerB.setDataSource(stg);
+                playerB.prepare();
+                playerA.pause();
+                playerB.start();
+                isPlayerAActive = false;
+            }
+            catch (IOException e)
+            {
+                Log.e("Error setting new song", e.getMessage());
+            }
 
+        }
+        else
+        {
+            try
+            {
+                playerA.reset();
+                String stg = LibraryModel.getInstance(this).GetPathFromSongId(ID);
+                Log.d("New path!", stg);
+                playerA.setDataSource(stg);
+                playerA.prepare();
+                playerB.pause();
+                playerA.start();
+                isPlayerAActive = true;
+            }
+            catch (IOException e)
+            {
+                Log.e("Error setting new song", e.getMessage());
+            }
+
+        }
     }
 
 
