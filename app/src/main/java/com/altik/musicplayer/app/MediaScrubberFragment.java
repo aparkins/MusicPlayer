@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.ToggleButton;
@@ -38,6 +39,8 @@ public class MediaScrubberFragment extends Fragment implements SeekBar.OnSeekBar
 
     // Buttons!
     private ToggleButton playButton;
+    private Button backButton;
+    private Button forwardButton;
 
     // Seekbar!
     private SeekBar scrubber;
@@ -56,6 +59,26 @@ public class MediaScrubberFragment extends Fragment implements SeekBar.OnSeekBar
                 else
                     callback.Pause();
             }
+        }
+    };
+
+    private Button.OnClickListener backListener = new Button.OnClickListener()
+    {
+        @Override
+        public void onClick(View view)
+        {
+            if (callback != null)
+                callback.SkipBack();
+        }
+    };
+
+    private Button.OnClickListener forwardListener = new Button.OnClickListener()
+    {
+        @Override
+        public void onClick(View view)
+        {
+            if (callback != null)
+                callback.SkipForward();
         }
     };
 
@@ -116,6 +139,12 @@ public class MediaScrubberFragment extends Fragment implements SeekBar.OnSeekBar
         View v = inflater.inflate(R.layout.fragment_media_scrubber, container, false);
         playButton = (ToggleButton)v.findViewById(R.id.playButton);
         playButton.setOnCheckedChangeListener(playListener);
+
+        backButton = (Button)v.findViewById(R.id.backButton);
+        backButton.setOnClickListener(backListener);
+
+        forwardButton = (Button)v.findViewById(R.id.forwardButton);
+        forwardButton.setOnClickListener(forwardListener);
 
         scrubber = (SeekBar)v.findViewById(R.id.scrubber);
         scrubber.setOnSeekBarChangeListener(this);

@@ -111,4 +111,19 @@ public class LibraryModel
         // If we didn't find one, return null
         return null;
     }
+
+    public int GetSongIdForPosition(int pos)
+    {
+        // TODO: fancier stuff
+        return sortedIds.get(pos);
+    }
+
+    public int GetPositionForSongId(int id)
+    {
+        for (int i = 0; i < sortedIds.size(); i++)
+            if (sortedIds.get(i) == id)
+                return i;
+
+        return -1;
+    }
 }

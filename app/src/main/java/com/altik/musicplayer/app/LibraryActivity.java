@@ -17,33 +17,68 @@ public class LibraryActivity extends Activity
 {
 
     // TODO: something of a hack for now
+    LibraryModel model;
     private MediaPlayer[] players;
     private int curPlayer = 0;
+    private int songPos = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        model = LibraryModel.getInstance(this);
         players = new MediaPlayer[2];
         players[0] = new MediaPlayer();
         players[1] = new MediaPlayer();
         players[0].setOnCompletionListener(this);
         players[1].setOnCompletionListener(this);
-        MediaPlayer current = players[curPlayer];
-        try
-        {
-            current.reset();
-            String stg = "/storage/emulated/0/Music/Dream Theater/(2002) Six Degrees of Inner Turbulence/CD2/03 Dream Theater - III War Inside My Head.mp3";
-            Log.d("String!", stg);
-            current.setDataSource(stg);
-            current.prepare();
-        }
-        catch (IOException e)
-        {
-            Log.e("ERROR", e.getMessage());
-        }
+        SetPresentSongById(model.GetSongIdForPosition(songPos));
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_library);
+    }
+
+    private void SetPresentSongById(int id)
+    {
+        try
+        {
+            MediaPlayer current = players[curPlayer];
+            boolean shouldStartPlaying = current.isPlaying();
+            current.reset();
+            String stg = LibraryModel.getInstance(this).GetPathFromSongId(id);
+            Log.d("New path!", stg);
+            current.setDataSource(stg);
+            current.prepare();
+            RefreshNextSong();
+            if (shouldStartPlaying)
+                current.start();
+        }
+        catch (IOException e)
+        {
+            Log.e("Error setting new song", e.getMessage());
+        }
+    }
+
+    private void RefreshNextSong()
+    {
+        SetNextSongById(model.GetSongIdForPosition(songPos + 1));
+    }
+
+    private void SetNextSongById(int id)
+    {
+        try
+        {
+            MediaPlayer next = players[curPlayer ^ 0x1];
+            next.reset();
+            String stg = LibraryModel.getInstance(this).GetPathFromSongId(id);
+            Log.d("New path!", stg);
+            next.setDataSource(stg);
+            next.prepare();
+            players[curPlayer].setNextMediaPlayer(next);
+        }
+        catch (IOException e)
+        {
+            Log.e("Error setting new song", e.getMessage());
+        }
     }
 
     @Override
@@ -61,13 +96,20 @@ public class LibraryActivity extends Activity
     @Override
     public void SkipForward()
     {
-        // TODO
+        songPos++;
+        SetPresentSongById(model.GetSongIdForPosition(songPos));
     }
 
     @Override
     public void SkipBack()
     {
-        // TODO
+        if (players[curPlayer].getCurrentPosition() > 4000)
+            players[curPlayer].seekTo(0);
+        else
+        {
+            songPos--;
+            SetPresentSongById(model.GetSongIdForPosition(songPos));
+        }
     }
 
     @Override
@@ -91,28 +133,18 @@ public class LibraryActivity extends Activity
     @Override
     public void SongIdSelected(int ID)
     {
-
-        try
-        {
-            MediaPlayer next = players[curPlayer ^ 0x1];
-            next.reset();
-            String stg = LibraryModel.getInstance(this).GetPathFromSongId(ID);
-            Log.d("New path!", stg);
-            next.setDataSource(stg);
-            next.prepare();
-            players[curPlayer].setNextMediaPlayer(next);
-        }
-        catch (IOException e)
-        {
-            Log.e("Error setting new song", e.getMessage());
-        }
+        songPos = model.GetPositionForSongId(ID);
+        SetPresentSongById(ID);
+        if (!players[curPlayer].isPlaying())
+            players[curPlayer].start();
     }
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer)
     {
         curPlayer ^= 0x1;
-        // TODO: set next mediaPlayer
+        songPos++;
+        SetNextSongById(model.GetSongIdForPosition(songPos));
     }
 
 
