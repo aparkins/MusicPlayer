@@ -8,7 +8,10 @@ import android.provider.MediaStore;
 import android.net.Uri;
 import android.util.Log;
 
+import com.altik.musicplayer.app.Model.SongComparators.TitleComparator;
+
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by Altik_0 on 5/19/2014.
@@ -26,6 +29,7 @@ public class LibraryModel
 {
     private Context c;
     private SongCache cache;
+    private ArrayList<Integer> sortedIds;
 
     private static LibraryModel instance;
 
@@ -66,27 +70,26 @@ public class LibraryModel
             } while(cursor.moveToNext());
         }
 
+        // Now that we've filled the cache, build our local sorted list:
+        sortedIds = cache.GetSortedIdArray(new TitleComparator());
+
         // TODO: filter results by blacklist
         // TODO: sort results by whatever criteria
     }
 
     public synchronized int GetLibraryCount()
     {
-        // TODO: blacklist
-        return cache.EntryCount();
+        return sortedIds.size();
     }
 
     public synchronized SongCache.SongCacheLine GetSongCacheAtIndex(int i)
     {
-        // TODO: handle sorting
-        // TODO: handle blacklist
-        return cache.GetEntry(i);
+        return cache.GetEntryFromId(sortedIds.get(i));
     }
 
     public synchronized boolean CacheIsEmpty()
     {
-        // TODO: handle blacklist
-        return cache.IsEmpty();
+        return sortedIds.isEmpty();
     }
 
     public String GetPathFromSongId(int ID)
