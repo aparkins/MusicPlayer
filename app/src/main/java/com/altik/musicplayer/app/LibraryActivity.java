@@ -12,24 +12,30 @@ import java.io.IOException;
 
 public class LibraryActivity extends Activity
         implements MediaScrubberFragment.ScrubberCallback,
-                   LibraryListFragment.LibraryFragmentCallback
+                   LibraryListFragment.LibraryFragmentCallback,
+                   MediaPlayer.OnCompletionListener
 {
 
-    boolean isPlayerAActive;
+    // TODO: something of a hack for now
+    private MediaPlayer[] players;
+    private int curPlayer = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        playerA = new MediaPlayer();
-        playerB = new MediaPlayer();
+        players = new MediaPlayer[2];
+        players[0] = new MediaPlayer();
+        players[1] = new MediaPlayer();
+        players[0].setOnCompletionListener(this);
+        players[1].setOnCompletionListener(this);
+        MediaPlayer current = players[curPlayer];
         try
         {
-            playerA.reset();
-            String stg = "/storage/emulated/0/Music/Other Music/Macklemore_and_Ryan_Lewis_-_Thrift_Shop_(feat._Wanz)_mp3.shmidt.net.mp3";
+            current.reset();
+            String stg = "/storage/emulated/0/Music/Dream Theater/(2002) Six Degrees of Inner Turbulence/CD2/03 Dream Theater - III War Inside My Head.mp3";
             Log.d("String!", stg);
-            playerA.setDataSource(stg);
-            playerA.prepare();
-            isPlayerAActive = true;
+            current.setDataSource(stg);
+            current.prepare();
         }
         catch (IOException e)
         {
@@ -40,19 +46,16 @@ public class LibraryActivity extends Activity
         setContentView(R.layout.activity_library);
     }
 
-    // TODO: something of a hack for now
-    private MediaPlayer playerA;
-    private MediaPlayer playerB;
     @Override
     public void Play()
     {
-        playerA.start();
+        players[curPlayer].start();
     }
 
     @Override
     public void Pause()
     {
-        playerA.pause();
+        players[curPlayer].pause();
     }
 
     @Override
@@ -68,46 +71,48 @@ public class LibraryActivity extends Activity
     }
 
     @Override
+    public int GetSongProgress()
+    {
+        return players[curPlayer].getCurrentPosition();
+    }
+
+    @Override
+    public int GetSongDuration()
+    {
+        return players[curPlayer].getDuration();
+    }
+
+    @Override
+    public void SetSongProgress(int seekPos)
+    {
+        players[curPlayer].seekTo(seekPos);
+    }
+
+    @Override
     public void SongIdSelected(int ID)
     {
-        if (isPlayerAActive)
-        {
-            try
-            {
-                playerB.reset();
-                String stg = LibraryModel.getInstance(this).GetPathFromSongId(ID);
-                Log.d("New path!", stg);
-                playerB.setDataSource(stg);
-                playerB.prepare();
-                playerA.pause();
-                playerB.start();
-                isPlayerAActive = false;
-            }
-            catch (IOException e)
-            {
-                Log.e("Error setting new song", e.getMessage());
-            }
 
-        }
-        else
+        try
         {
-            try
-            {
-                playerA.reset();
-                String stg = LibraryModel.getInstance(this).GetPathFromSongId(ID);
-                Log.d("New path!", stg);
-                playerA.setDataSource(stg);
-                playerA.prepare();
-                playerB.pause();
-                playerA.start();
-                isPlayerAActive = true;
-            }
-            catch (IOException e)
-            {
-                Log.e("Error setting new song", e.getMessage());
-            }
-
+            MediaPlayer next = players[curPlayer ^ 0x1];
+            next.reset();
+            String stg = LibraryModel.getInstance(this).GetPathFromSongId(ID);
+            Log.d("New path!", stg);
+            next.setDataSource(stg);
+            next.prepare();
+            players[curPlayer].setNextMediaPlayer(next);
         }
+        catch (IOException e)
+        {
+            Log.e("Error setting new song", e.getMessage());
+        }
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mediaPlayer)
+    {
+        curPlayer ^= 0x1;
+        // TODO: set next mediaPlayer
     }
 
 

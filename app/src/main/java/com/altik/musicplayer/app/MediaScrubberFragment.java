@@ -2,10 +2,12 @@ package com.altik.musicplayer.app;
 
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
 import java.io.InvalidClassException;
@@ -16,7 +18,7 @@ import java.io.InvalidClassException;
  * create an instance of this fragment.
  *
  */
-public class MediaScrubberFragment extends Fragment
+public class MediaScrubberFragment extends Fragment implements SeekBar.OnSeekBarChangeListener
 {
     public static interface ScrubberCallback
     {
@@ -24,6 +26,11 @@ public class MediaScrubberFragment extends Fragment
         public void Pause();
         public void SkipForward();
         public void SkipBack();
+
+        public int GetSongProgress();
+        public int GetSongDuration();
+
+        public void SetSongProgress(int seekPos);
         // TODO: more?
     }
 
@@ -31,6 +38,10 @@ public class MediaScrubberFragment extends Fragment
 
     // Buttons!
     private ToggleButton playButton;
+
+    // Seekbar!
+    private SeekBar scrubber;
+    private Handler handler;
 
     // Button listeners!
     private ToggleButton.OnCheckedChangeListener playListener = new ToggleButton.OnCheckedChangeListener()
@@ -44,6 +55,23 @@ public class MediaScrubberFragment extends Fragment
                     callback.Play();
                 else
                     callback.Pause();
+            }
+        }
+    };
+
+    // Since the MediaPlayer doesn't provide a nice interface for getting position
+    // updates, we'll just have to poll for it. :P
+    private boolean shouldUpdate = true;
+    private Runnable updateSeekBarAction = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            if (shouldUpdate)
+            {
+                scrubber.setMax(callback.GetSongDuration());
+                scrubber.setProgress(callback.GetSongProgress());
+                handler.postDelayed(updateSeekBarAction, 100);
             }
         }
     };
@@ -88,6 +116,13 @@ public class MediaScrubberFragment extends Fragment
         View v = inflater.inflate(R.layout.fragment_media_scrubber, container, false);
         playButton = (ToggleButton)v.findViewById(R.id.playButton);
         playButton.setOnCheckedChangeListener(playListener);
+
+        scrubber = (SeekBar)v.findViewById(R.id.scrubber);
+        scrubber.setOnSeekBarChangeListener(this);
+
+        // Setup scrubber updating
+        handler = new Handler();
+        handler.postDelayed(updateSeekBarAction, 100);
         return v;
     }
 
@@ -98,5 +133,30 @@ public class MediaScrubberFragment extends Fragment
 
         if (getActivity() instanceof ScrubberCallback)
             callback = (ScrubberCallback)getActivity();
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b)
+    {
+        // Nothing - our updating all gets taken care of in that damned poll loop.
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar)
+    {
+        // We want to make sure we stop updating the seekBar for a bit, so we'll just
+        // turn that loop off by removing any actions from the handler
+        handler.removeCallbacks(updateSeekBarAction);
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar)
+    {
+        // First, alert our callback that we've changed the position
+        callback.SetSongProgress(seekBar.getProgress());
+
+        // Alert the handler that we'd like (well, maybe "like" isn't quite the right
+        // word) to start polling again.
+        handler.postDelayed(updateSeekBarAction, 100);
     }
 }
